@@ -22,7 +22,15 @@
 
 (defn difference
   [[x1 y1] [x2 y2]]
-  [(- x2 x1) (- y2 y1)])
+  [(- x1 x2) (- y1 y2)])
+
+(defn rotate-right
+  [[x y] degrees]
+  (case (mod degrees 360)
+    0   [x y]
+    90  [(- y) x]
+    180 [(- x) (- y)]
+    270 [y (- x)]))
 
 (defn move
   [s [c v]]
@@ -31,17 +39,24 @@
     \S (update-in s [:waypoint 1] #(+ % v))
     \E (update-in s [:waypoint 0] #(+ % v))
     \W (update-in s [:waypoint 0] #(- % v))
-    \R
-    \L
-    \F ))
+    \R (let [d (-> (difference (:waypoint s) (:ship s))
+                   (rotate-right v))]
+         (assoc s :waypoint (plus (:ship s) d)))
+    \L (let [d (-> (difference (:waypoint s) (:ship s))
+                   (rotate-right (- 360 v)))]
+         (assoc s :waypoint (plus (:ship s) d)))
+    \F (let [d (difference (:waypoint s) (:ship s))
+             ship (nth (iterate #(plus d %) (:ship s)) v)
+             waypoint (plus ship d)]
+         (assoc s :ship ship :waypoint waypoint))))
 
 (defn manhattan
-  [{:keys [position]}]
-  (+ (Math/abs (first position)) (Math/abs (second position))))
+  [[x y]]
+  (+ (Math/abs x) (Math/abs y)))
 
 (->> input
      parse-commands
      (reduce move {:ship [0 0] :waypoint [10 -1]})
+     :ship
      manhattan)
-
-;;=> 757
+;;=> 51249

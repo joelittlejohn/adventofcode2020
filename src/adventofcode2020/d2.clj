@@ -1,6 +1,7 @@
 (ns adventofcode2020.d2
   (:require [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as gen]
             [clojure.string :as str]))
 
 (def input
@@ -34,7 +35,7 @@
   (->> (range 97 123) (map char) set))
 
 (s/def ::number
-  (s/* (->> (range 48 58) (map char) set)))
+  (s/+ (->> (range 48 58) (map char) set)))
 
 (s/def ::range
   (s/cat :number-a ::number
@@ -42,7 +43,7 @@
          :number-b ::number))
 
 (s/def ::password
-  (s/* ::letter))
+  (s/+ ::letter))
 
 (s/def ::policy
   (s/cat :range ::range :space #{\space} :letter ::letter))
@@ -79,3 +80,5 @@
 
 (->> input (map regex-parse) (filter official-toboggan-validate) count)
 ;; => 747
+
+(gen/generate (s/gen ::pasword-line))
