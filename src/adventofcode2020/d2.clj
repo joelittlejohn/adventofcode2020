@@ -81,4 +81,6 @@
 (->> input (map regex-parse) (filter official-toboggan-validate) count)
 ;; => 747
 
-(gen/generate (s/gen ::pasword-line))
+(->> (gen/sample (s/gen ::password-line))
+     (map #(apply str %))
+     (map regex-parse))
